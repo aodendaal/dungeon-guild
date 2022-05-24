@@ -5,17 +5,22 @@ using UnityEngine;
 
 public class Game : MonoBehaviour
 {
+    #region Singleton
+
     public static Game Instance;
+
+    void Awake()
+    {
+        Instance = this;
+    }
+
+    #endregion
 
     [SerializeField] private GameObject characterButton;
     [SerializeField] private GameObject characterListPanel;
     [SerializeField] private GameObject player;
 
     public List<string> characters;
-    void Awake()
-    {
-        Instance = this;
-    }
 
     private void Start()
     {
@@ -32,12 +37,12 @@ public class Game : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-        
+
         foreach (var name in characters)
         {
             var go = Instantiate(characterButton, new Vector3(0, 0, 0), quaternion.identity);
             go.transform.parent = characterListPanel.transform;
-            
+
             go.GetComponent<CharacterButton>().SetName(name);
         }
     }

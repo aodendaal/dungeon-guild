@@ -68,19 +68,19 @@ public class DungeonManager : MonoBehaviour
         }
     }
 
-    public Cell GetCell(int x, int y)
+    public GameCell GetCell(int x, int y)
     {
         return map.GetCell(x, y);
     }
 
-    public Cell GetCell(float x, float y)
+    public GameCell GetCell(float x, float y)
     {
         return GetCell((int)x, (int)y);
     }
 
     public Vector2Int GetRandomWalkablePosition()
     {
-        var cell = map.GetAllCells().Where(c => c.IsWalkable).GetRandomCell();
+        var cell = map.GetAllCells().Where(c => c.IsWalkable && !encounters.Contains(new Vector2Int(c.X, c.Y))).GetRandomCell();
 
         return new Vector2Int(cell.X, cell.Y);
     }
@@ -95,5 +95,17 @@ public class DungeonManager : MonoBehaviour
     public void VisitCell(float x, float y)
     {
         VisitCell((int)x, (int)y);
+    }
+
+    public bool ContainsEncounter(float x, float y)
+    {
+        return encounters.Contains(new Vector2Int((int)x, (int)y));
+    }
+
+    public void RemoveEncounter(int x, int y)
+    {
+        encounters.Remove(new Vector2Int(x, y));
+        var go = transform.Find($"Encounter ({x},{y})").gameObject;
+        Destroy(go);
     }
 }

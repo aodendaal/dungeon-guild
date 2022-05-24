@@ -52,9 +52,13 @@ public class CombatManager : MonoBehaviour
 
         characters = new List<GameObject>();
 
-        var go = Instantiate(characterPrefab, Vector3.one, Quaternion.identity, enemyVerticalGroup.transform);
-        go.GetComponent<CombatCharacterController>().Setup("Goblin 1", 10, 2.0f);
-        characters.Add(go);
+        var count = Random.Range(1, 4);
+        for (int i = 0; i < count; i++)
+        {
+            var go = Instantiate(characterPrefab, Vector3.one, Quaternion.identity, enemyVerticalGroup.transform);
+            go.GetComponent<CombatCharacterController>().Setup("Goblin 1", 10, 2.0f);
+            characters.Add(go);
+        }
 
         var go2 = Instantiate(characterPrefab, Vector3.one, Quaternion.identity, playerVerticalGroup.transform);
         go2.GetComponent<CombatCharacterController>().Setup("Player", 10, 2.0f);

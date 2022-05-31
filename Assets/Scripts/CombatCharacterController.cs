@@ -68,6 +68,7 @@ public class CombatCharacterController : MonoBehaviour
             currentHitPoints = 0;
         }
 
+        characterDetails.CurrentHitPoints = currentHitPoints;
         healthSlider.value = (float)currentHitPoints / (float)characterDetails.HitPoints;
     }
 }

@@ -53,8 +53,6 @@ public class CombatManager : MonoBehaviour
     void Start()
     {
         combatPanel.SetActive(false);
-        
-
     }
 
     public void StartCombat(float x, float y)

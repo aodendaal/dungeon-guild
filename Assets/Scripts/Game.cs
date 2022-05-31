@@ -26,10 +26,17 @@ public class Game : MonoBehaviour
     [Header("Dungeon")]
     [SerializeField] private GameObject playerGameObject;
     [SerializeField] private PlayerInput playerInput;
+    [SerializeField] private GameObject characterViewPanel;
+    [SerializeField] private GameObject characterStatViewPrefab;
 
     public List<MonsterScriptableObject> characters;
     [HideInInspector]
     public List<MonsterScriptableObject> selectedCharacters;
+
+    private void Start()
+    {
+        startMenuPanel.SetActive(true);
+    }
 
     public void UpdateDungeonButton()
     {
@@ -67,6 +74,13 @@ public class Game : MonoBehaviour
         var startPosition = DungeonManager.Instance.GetRandomWalkablePosition();
         playerGameObject.transform.position = new Vector3(startPosition.x, 0.0f, startPosition.y);
         DungeonManager.Instance.VisitCell(startPosition.x, startPosition.y);
+
+        foreach (var character in selectedCharacters)
+        {
+            var go = Instantiate(characterStatViewPrefab, Vector3.zero, quaternion.identity, characterViewPanel.transform);
+            character.CurrentHitPoints = character.HitPoints;
+            go.GetComponent<CharacterStatView>().SetCharacter(character);
+        }
 
         playerInput.SwitchCurrentActionMap("World");
     }

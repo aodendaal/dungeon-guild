@@ -11,4 +11,5 @@ public class MonsterScriptableObject : ScriptableObject
     public int Attack;
     public int Defense;
     public int HitPoints;
+    public int CurrentHitPoints;
 }

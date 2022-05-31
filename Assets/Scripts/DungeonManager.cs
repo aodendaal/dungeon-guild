@@ -5,6 +5,7 @@ using RogueSharp;
 using System;
 using System.Linq;
 
+
 public class DungeonManager : MonoBehaviour
 {
     #region Singleton
@@ -28,8 +29,8 @@ public class DungeonManager : MonoBehaviour
 
     public void GenerateDungeon()
     {
-        //var strategy = new RogueSharp.MapCreation.RandomRoomsMapCreationStrategy<Map>(50, 50, 50, 5, 2);
-        var strategy = new RogueSharp.MapCreation.BinaryTreeAlgorithmCreationStrategy<GameMap, GameCell>(21, 21);
+        var r = new RogueSharp.Random.DotNetRandom(1234);
+        var strategy = new RogueSharp.MapCreation.BinaryTreeAlgorithmCreationStrategy<GameMap, GameCell>(21, 21, r);
 
         map = strategy.CreateMap();
         PlaceDungeonTiles();

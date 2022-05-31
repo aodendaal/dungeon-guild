@@ -15,27 +15,40 @@ public class CombatCharacterController : MonoBehaviour
     private TMP_Text nameText;
     [SerializeField]
     private Slider healthSlider;
+    [SerializeField]
+    private Image portrait;
 
-    private int currentHealth;
-    private int maxHealth;
+    public MonsterScriptableObject characterDetails;
+    public int currentHitPoints;
 
     private float turnTime;
     private float turnRate;
 
-    public void Setup(string name, int health, float turnRate)
-    {
-        nameText.text = name;
+    private CombatManager.Sides attackingSide;
 
-        currentHealth = health;
-        maxHealth = health;
+    public void Setup(MonsterScriptableObject monster, float turnRate, CombatManager.Sides attacks)
+    {
+        this.characterDetails = monster;
+        nameText.text = monster.Name;
+
+        portrait.sprite = monster.portrait;
+
+        currentHitPoints = monster.HitPoints;
 
         turnTime = Random.Range(0.0f, turnRate / 2.0f);
         this.turnRate = turnRate;
         speedText.text = $"Speed: {(int)(turnRate * 100.0f):D2}";
+
+        attackingSide = attacks;
     }
 
-    private void Update()
+    void Update()
     {
+        if (CombatManager.Instance.IsCombatPaused)
+        {
+            return;
+        }
+
         turnTime += Time.deltaTime;
 
         timeSlider.value = turnTime / turnRate;
@@ -43,7 +56,18 @@ public class CombatCharacterController : MonoBehaviour
         if (turnTime >= turnRate)
         {
             turnTime = 0;
-            CombatManager.Instance.Attack();
+            CombatManager.Instance.Attack(this, attackingSide);
         }
+    }
+
+    public void TakeDamage(int points)
+    {
+        currentHitPoints -= points;
+        if (currentHitPoints < 0)
+        {
+            currentHitPoints = 0;
+        }
+
+        healthSlider.value = (float)currentHitPoints / (float)characterDetails.HitPoints;
     }
 }

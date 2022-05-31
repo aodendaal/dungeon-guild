@@ -29,17 +29,32 @@ public class CombatManager : MonoBehaviour
     [Header("Prefabs")]
     [SerializeField]
     private GameObject characterPrefab;
+    [Header("Monsters")]
+    [SerializeField]
+    private MonsterScriptableObject[] monsters;
+    [SerializeField]
+    private Sprite playerSprite;
 
-    private List<GameObject> characters;
+    private List<GameObject> enemies;
+    private List<GameObject> players;
 
     public bool IsInCombat;
+    public bool IsCombatPaused;
 
     private Vector2Int combatLocation;
+
+    public enum Sides
+    {
+        Enemies,
+        Players
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         combatPanel.SetActive(false);
+        
+
     }
 
     public void StartCombat(float x, float y)
@@ -50,24 +65,79 @@ public class CombatManager : MonoBehaviour
 
         combatPanel.SetActive(true);
 
-        characters = new List<GameObject>();
+        enemies = new List<GameObject>();
+        players = new List<GameObject>();
 
         var count = Random.Range(1, 4);
         for (int i = 0; i < count; i++)
         {
+            var monster = monsters[Random.Range(0, monsters.Length)];
             var go = Instantiate(characterPrefab, Vector3.one, Quaternion.identity, enemyVerticalGroup.transform);
-            go.GetComponent<CombatCharacterController>().Setup("Goblin 1", 10, 2.0f);
-            characters.Add(go);
+            go.GetComponent<CombatCharacterController>().Setup(monster, 2.0f, Sides.Players);
+            enemies.Add(go);
         }
 
-        var go2 = Instantiate(characterPrefab, Vector3.one, Quaternion.identity, playerVerticalGroup.transform);
-        go2.GetComponent<CombatCharacterController>().Setup("Player", 10, 2.0f);
-        characters.Add(go2);
+        for (int i = 0; i < Game.Instance.selectedCharacters.Count; i++)
+        {
+            var go2 = Instantiate(characterPrefab, Vector3.one, Quaternion.identity, playerVerticalGroup.transform);
+
+            go2.GetComponent<CombatCharacterController>().Setup(Game.Instance.selectedCharacters[i], 2.0f, Sides.Enemies);
+            players.Add(go2);
+        }
     }
 
-    public void Attack()
+    public void Attack(CombatCharacterController from, Sides to)
     {
-        foreach (var go in characters)
+        var attacker = from.characterDetails;
+        CombatCharacterController defender;
+
+        if (to == Sides.Enemies)
+        {
+            var go = enemies[Random.Range(0, enemies.Count)];
+            defender = go.GetComponent<CombatCharacterController>();
+        }
+        else
+        {
+            var go = players[Random.Range(0, players.Count)];
+            defender = go.GetComponent<CombatCharacterController>();
+        }
+
+        var chanceToHit = Mathf.Clamp(100 + attacker.Attack - defender.characterDetails.Defense, 10, 100);
+        var roll = Random.Range(1, 101);
+        var damage = Random.Range(1, 7);
+
+        Debug.Log($"{attacker.Name} attacks {defender.characterDetails.Name} with {chanceToHit}% and rolls {roll} and {damage} damage");
+
+        if (roll <= chanceToHit)
+        {
+            defender.TakeDamage(damage);
+            if (defender.currentHitPoints <= 0)
+            {
+                if (to == Sides.Players)
+                {
+                    defender.TakeDamage(-1);
+                    return;
+                }
+
+                enemies.Remove(defender.gameObject);
+
+                Destroy(defender.gameObject);
+
+                if (enemies.Count == 0)
+                {
+                    CombatOver();
+                }
+            }
+        }
+    }
+
+    private void CombatOver()
+    {
+        foreach (var go in enemies)
+        {
+            Destroy(go);
+        }
+        foreach (var go in players)
         {
             Destroy(go);
         }
@@ -77,6 +147,4 @@ public class CombatManager : MonoBehaviour
 
         DungeonManager.Instance.RemoveEncounter(combatLocation.x, combatLocation.y);
     }
-
-
 }

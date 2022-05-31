@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class Game : MonoBehaviour
 {
@@ -16,19 +18,29 @@ public class Game : MonoBehaviour
 
     #endregion
 
-    [SerializeField] private GameObject characterButton;
+    [Header("Main Menu")]
+    [SerializeField] private GameObject startMenuPanel;
+    [SerializeField] private GameObject characterCard;
     [SerializeField] private GameObject characterListPanel;
-    [SerializeField] private GameObject player;
+    [SerializeField] private Button enterDungeonButton;
+    [Header("Dungeon")]
+    [SerializeField] private GameObject playerGameObject;
+    [SerializeField] private PlayerInput playerInput;
 
-    public List<string> characters;
+    public List<MonsterScriptableObject> characters;
+    [HideInInspector]
+    public List<MonsterScriptableObject> selectedCharacters;
 
-    private void Start()
+    public void UpdateDungeonButton()
     {
-        DungeonManager.Instance.GenerateDungeon();
-
-        var startPosition = DungeonManager.Instance.GetRandomWalkablePosition();
-        player.transform.position = new Vector3(startPosition.x, 0.0f, startPosition.y);
-        DungeonManager.Instance.VisitCell(startPosition.x, startPosition.y);
+        if (selectedCharacters.Count == 0)
+        {
+            enterDungeonButton.interactable = false;
+        }
+        else
+        {
+            enterDungeonButton.interactable = true;
+        }
     }
 
     public void UpdateCharacterList()
@@ -38,12 +50,24 @@ public class Game : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        foreach (var name in characters)
+        foreach (var character in characters)
         {
-            var go = Instantiate(characterButton, new Vector3(0, 0, 0), quaternion.identity);
-            go.transform.parent = characterListPanel.transform;
+            var go = Instantiate(characterCard, new Vector3(0, 0, 0), quaternion.identity, characterListPanel.transform);
 
-            go.GetComponent<CharacterButton>().SetName(name);
+            go.GetComponent<CharacterCard>().SetName(character);
         }
+    }
+
+    public void EnterDungeon()
+    {
+        startMenuPanel.SetActive(false);
+     
+        DungeonManager.Instance.GenerateDungeon();
+
+        var startPosition = DungeonManager.Instance.GetRandomWalkablePosition();
+        playerGameObject.transform.position = new Vector3(startPosition.x, 0.0f, startPosition.y);
+        DungeonManager.Instance.VisitCell(startPosition.x, startPosition.y);
+
+        playerInput.SwitchCurrentActionMap("World");
     }
 }

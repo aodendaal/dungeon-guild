@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class MovementManager : MonoBehaviour
 {
@@ -30,64 +31,96 @@ public class MovementManager : MonoBehaviour
         audioSource = player.GetComponent<AudioSource>();
     }
 
+    public void MoveUp(InputAction.CallbackContext context)
+    {
+        if (!context.performed)
+            return;
+
+        if (CombatManager.Instance.IsInCombat)
+        {
+            return;
+        }
+
+        var cell = DungeonManager.Instance.GetCell(player.transform.position.x, player.transform.position.z + 1.0f);
+
+        if (cell.IsWalkable)
+        {
+            player.transform.position += new Vector3(0.0f, 0.0f, 1.0f);
+            model.transform.rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+
+            RunEncounter();
+        }
+    }
+
+    public void MoveDown(InputAction.CallbackContext context)
+    {
+        if (!context.performed)
+            return;
+
+        if (CombatManager.Instance.IsInCombat)
+        {
+            return;
+        }
+
+        var cell = DungeonManager.Instance.GetCell(player.transform.position.x, player.transform.position.z - 1.0f);
+
+        if (cell.IsWalkable)
+        {
+            player.transform.position += new Vector3(0.0f, 0.0f, -1.0f);
+            model.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
+
+            RunEncounter();
+        }
+    }
+
+    public void MoveLeft(InputAction.CallbackContext context)
+    {
+        if (!context.performed)
+            return;
+
+        if (CombatManager.Instance.IsInCombat)
+        {
+            return;
+        }
+
+        var cell = DungeonManager.Instance.GetCell(player.transform.position.x - 1.0f, player.transform.position.z);
+
+        if (cell.IsWalkable)
+        {
+            player.transform.position += new Vector3(-1.0f, 0.0f, 0.0f);
+            model.transform.rotation = Quaternion.Euler(0.0f, 270.0f, 0.0f);
+
+            RunEncounter();
+        }
+    }
+
+    public void MoveRight(InputAction.CallbackContext context)
+    {
+        if (!context.performed)
+            return;
+
+        if (CombatManager.Instance.IsInCombat)
+        {
+            return;
+        }
+
+        var cell = DungeonManager.Instance.GetCell(player.transform.position.x + 1.0f, player.transform.position.z);
+
+        if (cell.IsWalkable)
+        {
+            player.transform.position += new Vector3(1.0f, 0.0f, 0.0f);
+            model.transform.rotation = Quaternion.Euler(0.0f, 90.0f, 0.0f);
+
+            RunEncounter();
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
         if (CombatManager.Instance.IsInCombat)
         {
             return;
-        }
-
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            var cell = DungeonManager.Instance.GetCell(player.transform.position.x, player.transform.position.z + 1.0f);
-
-            if (cell.IsWalkable)
-            {
-                player.transform.position += new Vector3(0.0f, 0.0f, 1.0f);
-                model.transform.rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
-
-                RunEncounter();
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            var cell = DungeonManager.Instance.GetCell(player.transform.position.x, player.transform.position.z - 1.0f);
-
-            if (cell.IsWalkable)
-            {
-                player.transform.position += new Vector3(0.0f, 0.0f, -1.0f);
-                model.transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
-
-                RunEncounter();
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            var cell = DungeonManager.Instance.GetCell(player.transform.position.x - 1.0f, player.transform.position.z);
-
-            if (cell.IsWalkable)
-            {
-                player.transform.position += new Vector3(-1.0f, 0.0f, 0.0f);
-                model.transform.rotation = Quaternion.Euler(0.0f, 270.0f, 0.0f);
-
-                RunEncounter();
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            var cell = DungeonManager.Instance.GetCell(player.transform.position.x + 1.0f, player.transform.position.z);
-
-            if (cell.IsWalkable)
-            {
-                player.transform.position += new Vector3(1.0f, 0.0f, 0.0f);
-                model.transform.rotation = Quaternion.Euler(0.0f, 90.0f, 0.0f);
-
-                RunEncounter();
-            }
         }
 
         UpdateLocationText();
